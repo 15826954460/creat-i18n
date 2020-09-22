@@ -10,6 +10,7 @@ import { ipcRenderer } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import xlsx from 'node-xlsx';
+import util from '@/utils';
 
 const resolve = (dir) => {
   return path.join(__dirname, dir);
@@ -33,6 +34,8 @@ export default {
         'zhTW'
       ],
       startIndex: 1,
+      devCusFiedList: [], // 自定义字段列表
+      xlsxData: [], // 表格字段列表
     }
   },
   mounted() { 
@@ -106,12 +109,29 @@ export default {
               // 读取文件内容
               const json = fs.readFileSync(filename, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
+              this.cereteField(jsonData);
               xlxsData.push(jsonData);
             }
           });
           this.createXlsx();
         }
       });
+    },
+
+    cereteField(jsonData) {
+      let fieldName = '';
+      let val = '';
+      for (const [key, value] of Object.entries(jsonData)) {
+        fieldName += `${key}-`
+        if (util.dataTypeDetection(value) === 'object') {
+          this.cereteField(value);
+        }
+        if (util.dataTypeDetection(value) === 'array') {
+          val = value.join('||');
+        }
+        val = value;
+      }
+      this.devCusFiedList.push[fieldName];
     },
 
     // 生成xlsx
