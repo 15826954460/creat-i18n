@@ -1,0 +1,33 @@
+/* 全局样式 */
+
+.__rel {
+  position: relative;
+}
+
+.__abs{
+  position: absolute;
+}
+
+.__fix {
+  position: fixed;
+}
+
+.__disable {
+  cursor: not-allowed;
+}
+
+.__cursor {
+  cursor: pointer;
+}
+
+.__inb {
+  display: inline-block;
+}
+
+.__ellip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+

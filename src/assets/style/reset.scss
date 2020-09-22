@@ -1,0 +1,59 @@
+@charset "utf-8";
+div, ul, li, p, h1, h2, h3, h4, h5, h6, dl, dt, dd, a, span, image, i, button, ::before, ::after, aside, nav, section {
+    box-sizing: border-box;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+body {
+    font: 12px Helvetica Neue, Arial, Luxi Sans, DejaVu Sans, Tahoma, Hiragino Sans GB, STHeiti, Microsoft YaHei;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+div, ul, li, p, h1, h2, h3, h4, h5, h6, dl, dt, dd {
+    margin: 0;
+    padding: 0;
+    border: none;
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+a :hover {
+    text-decoration: none;
+}
+
+img {
+    vertical-align: middle;
+}
+
+button {
+    border: transparent;  //自定义边框
+    outline: none;
+    background: transparent;
+}
+
+input {
+    background: none;
+    border: none;
+    outline: none;
+    padding: 0;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+  
+::-webkit-scrollbar-thumb {
+    border-radius: 50px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
