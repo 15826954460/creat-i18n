@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
+import { on } from 'events';
 
 const resolve = (dir) => {
   return path.join(__dirname, dir);
@@ -20,25 +21,12 @@ export default {
   name: 'App',
   data() {
     return {
-      excelTitle: [
-        '字段名称(开发自定义)',
-        'ar',   'bgBG', 'bs',   'ca',   'csCZ',
-        'daDK', 'de',   'elGR', 'enUS', 'es',
-        'esES', 'etEE', 'faIR', 'fiFI', 'fr',
-        'hiIN', 'hrHR', 'huHU', 'inID', 'it',
-        'iw',   'jaJP', 'ko',   'ltLT', 'lvLV',
-        'mk',   'msMY', 'myMM', 'nbNO', 'nl',
-        'plPL', 'ptBR', 'ptPT', 'roRO', 'ruRU',
-        'skSK', 'slSI', 'sr',   'svSE', 'thTH',
-        'trTR', 'ukUA', 'viVN', 'zhCN', 'zhHK',
-        'zhTW'
-      ],
+      excelCusTitle: '字段名称(开发自定义)',
       startIndex: 1,
-      devCusFiedList: [], // 自定义字段列表
-      xlsxData: [], // 表格字段列表
+      xlsxData: [], // 表格数据列表
+      fieldName: '',
+      index: 0,
     }
-  },
-  mounted() { 
   },
   methods: {
     selectFile() {
@@ -94,49 +82,75 @@ export default {
 
     // 文件读取
     readdir(floderPath) {
+      const _that = this;
       // 根据文件路径读取文件，返回文件列表
-      fs.readdir(floderPath, function(err,files){
+      fs.readdir(floderPath, (err, files) => {
         if (err) {
           // TODO: 错误提示代优化
           console.warn(err)
         } else {
-          let filenameList = [];
-          let xlxsData = [];
+          _that.xlsxData.push([_that.excelCusTitle]);
           // 遍历读取到的文件列表
-          files.forEach((filename) => {
+          files.forEach((filename, fileIndex) => {
+            _that.excelRowList = [];
             if (/.json/.test(filename)) {
-              filenameList.push(filename.split('.')[0]);
+              _that.xlsxData[0].push(filename.split('.')[0]);  // 创建表格titleconsole.log(filename);
               // 读取文件内容
-              const json = fs.readFileSync(filename, { encoding: 'utf8' });
+              const json = fs.readFileSync(`${floderPath}/${filename}`, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
-              this.cereteField(jsonData);
-              xlxsData.push(jsonData);
+              Object.keys(jsonData).forEach((key, index) => {
+                _that.cereteFieldAndValue({ jsonItem: jsonData[key], index, fileIndex, key });
+              });
             }
           });
-          this.createXlsx();
+          _that.createXlsx();
         }
       });
     },
-
-    cereteField(jsonData) {
-      let fieldName = '';
-      let val = '';
-      for (const [key, value] of Object.entries(jsonData)) {
-        fieldName += `${key}-`
-        if (util.dataTypeDetection(value) === 'object') {
-          this.cereteField(value);
-        }
-        if (util.dataTypeDetection(value) === 'array') {
-          val = value.join('||');
-        }
-        val = value;
+    cereteFieldAndValue({ jsonItem, key, index, fileIndex }) {
+      this.index = this.index + index;
+      const __index = this.index;
+      if (util.dataTypeDetection(jsonItem) === 'object') {
+        // if (fileIndex === 0) {
+          this.fieldName = `${key}`;
+          let __oldKay = this.fieldName;
+          Object.keys(jsonItem).forEach((key, idx) => {
+            const __key =  `${__oldKay}-${key}`;
+            this.cereteFieldAndValue({ jsonItem: jsonItem[key], fileIndex, index: __index + idx, key: __key });
+          });
+        // }
       }
-      this.devCusFiedList.push[fieldName];
+      if (util.dataTypeDetection(jsonItem) === 'array') {
+        this.fieldName = `${key}`;
+        // if (fileIndex === 0) {
+           if (util.dataTypeDetection(this.xlsxData[__index + 1]) === 'array') {
+          this.xlsxData[__index + 1][0] = this.fieldName;
+          } else {
+            this.xlsxData[__index + 1] = [this.fieldName];
+          }
+        // }
+        this.xlsxData[__index + 1].push(jsonItem.join('||'));
+        this.fieldName = '';
+      }
+      if (util.dataTypeDetection(jsonItem) === 'string') {
+        this.fieldName = `${key}`;
+        // if (fileIndex === 0) {
+          if (util.dataTypeDetection(this.xlsxData[__index + 1]) === 'array') {
+            this.xlsxData[__index + 1][0] = this.fieldName;
+          } else {
+            this.xlsxData[__index + 1] = [this.fieldName];
+          }
+        // }
+        this.xlsxData[__index + 1].push(jsonItem);
+        this.fieldName = '';
+      }
     },
 
     // 生成xlsx
     createXlsx() {
-      // TODO:
+      console.log(this.xlsxData);
+      // const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
+      // fs.writeFileSync(resolve('./i18n-electest.xlsx'), buffer);
     }
   },
 }
@@ -146,15 +160,18 @@ export default {
     width: 100%;
     height: 100%;
     background: rgba(133,194,226, 0.2);
+    -webkit-app-region: drag;
     .red {
       background-color: lightcoral;
       border-radius: 4px;
       overflow: hidden;
+      -webkit-app-region: no-drag;
     }
     .blue {
       background-color: #417FF9;
       border-radius: 4px;
       overflow: hidden;
+      -webkit-app-region: no-drag;
     }
   }
 </style>
