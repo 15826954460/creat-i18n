@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <button class="red"  @click="selectFile"> excel to be JSON </button>
-    <button class="blue"  @click="selectFloder"> excel to be JSON </button>
+    <button class="blue"  @click="selectFloder">JSON  to be excel </button>
   </div>
 </template>
 
@@ -11,11 +11,6 @@ import fs from 'fs';
 import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
-import { on } from 'events';
-
-const resolve = (dir) => {
-  return path.join(__dirname, dir);
-}
 
 export default {
   name: 'App',
@@ -27,6 +22,9 @@ export default {
       fieldName: '',
       index: 0,
       fload: false,
+      celList: [],
+      fileNameList: [],
+      fieldNamesList: [],
     }
   },
   methods: {
@@ -43,27 +41,55 @@ export default {
     createJson(path) {
       // 解析buffer
       const sheetsList = xlsx.parse(`${path}`);
+      console.log(111,sheetsList);
       // 遍历 sheetList [{name: '', data: []}]
       sheetsList.forEach((sheet, index) => {
         // 只遍历第一个
         if (index === 0) {
-          const titleData = sheet['data'][0]; // 获取表格第一行(国家名称)
-          let fileNameList = []; // 文件名称列表
-          // 可以选择第几列开始获取标题
-          for (let i = this.startIndex, len = titleData.length; i < len; i++) {
-            fileNameList.push(titleData[i]);
-          }
-          // for (let j = 0, len = fileNameList.length; j < len; j ++) {
-          //   let contentText = `export default {`
-          //   for (let rowId = 1, len = sheet['data'].length; rowId < len; rowId++) {
-          //     contentText += `'${sheet['data'][rowId][0]} => ${sheet['data'][rowId][2]}': '${sheet['data'][rowId][j + 3]}',
-          //     `;
-          //   }
-          //   contentText += `}`;
-          //   fs.writeFileSync(resolve(`./xlsx/${fileNameList[j]}.js`), contentText);
-          // }
+          const sheetDataList = sheet['data'];
+          const titleData = sheetDataList[0]; // 获取表格第一行(国家名称)
+          this.excelDataRestruct(titleData, sheetDataList);
+          this.createObjDataStruct();
         }
       });
+    },
+
+    // 表格数据进行重组
+    excelDataRestruct(titleData, sheetDataList) {
+      const { fileNameList, celList, fieldNamesList } = this;
+      // 生成文件名列表
+      titleData.forEach((item, idx) => {
+        (idx !== 0) && fileNameList.push(item); 
+      });
+      // 数据拆分提取
+      sheetDataList.slice(1).forEach((rowArr, indx) => {
+        rowArr.forEach((rowItem, rowItemIndex) => {
+          // 提取列数据(每一列数据为一个json文件)
+          if (rowItemIndex !== 0 ) {
+            if (util.dataTypeDetection(celList[rowItemIndex - 1]) !== 'array') {
+              celList[rowItemIndex - 1] = [];
+              if (rowItemIndex !== 0) {
+                celList[rowItemIndex - 1].push(rowItem);
+              }
+            }
+            celList[rowItemIndex - 1].push(rowItem);
+          }
+          // 获取自定义字段名
+          if (rowItemIndex === 0) {
+            fieldNamesList.push(rowItem);
+          }
+        })
+      });
+    },
+
+    createObjDataStruct() {
+      // const { fieldNamesList } = this;
+      // floderPathsList.forEach((item, index) => {
+      //   let arr = item.split('-');
+      //   if (arr.length === 1) {
+      //     data[item] = ''
+      //   }
+      // });
     },
 
     selectFloder() {
@@ -147,9 +173,9 @@ export default {
 
     // 生成xlsx
     createXlsx() {
-      console.log(this.xlsxData);
-      // const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
-      // fs.writeFileSync(resolve('./i18n-electest.xlsx'), buffer);
+      // TODO: 文件名称可选择(默认)
+      const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
+      fs.writeFileSync('C:\\Users\\baiyunsong\\Desktop\\i18n.xlsx', buffer);
     }
   },
 }
