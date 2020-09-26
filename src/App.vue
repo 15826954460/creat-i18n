@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <button class="red"  @click="selectFile"> excel to be JSON </button>
-    <button class="blue" @click="selectFolder"> JSON to be excel </button>
+    <button class="blue"  @click="selectFloder"> excel to be JSON </button>
   </div>
 </template>
 
@@ -26,6 +26,7 @@ export default {
       xlsxData: [], // 表格数据列表
       fieldName: '',
       index: 0,
+      fload: false,
     }
   },
   methods: {
@@ -36,14 +37,12 @@ export default {
       ipcRenderer.on('select-file', this.getFilePath);
     },
     getFilePath(event, filePathsList) {
-      // 获取文件路径
-      const path = filePathsList[0];
+      const path = filePathsList[0]; // 获取文件路径
+      this.createJson(path);
+    },
+    createJson(path) {
       // 解析buffer
       const sheetsList = xlsx.parse(`${path}`);
-      // 生成buffer
-      this.createJson(sheetsList);
-    },
-    createJson(sheetsList) {
       // 遍历 sheetList [{name: '', data: []}]
       sheetsList.forEach((sheet, index) => {
         // 只遍历第一个
@@ -67,17 +66,14 @@ export default {
       });
     },
 
-    // 选择文件夹
-    selectFolder() {
-      // 选择文件夹
+    selectFloder() {
       ipcRenderer.send('open-directory-dialog', 'openDirectory');
       ipcRenderer.on('select-folder', this.getFolderPath);
     },
 
-    // get folder path
-    getFolderPath(event, folderPathList) {
-      const floderPath = folderPathList[0];
-      this.readdir(floderPath);
+    getFolderPath(event, floderPathsList) {
+      const path = floderPathsList[0]; // 获取文件路径
+      this.readdir(path);
     },
 
     // 文件读取
@@ -92,14 +88,14 @@ export default {
           _that.xlsxData.push([_that.excelCusTitle]);
           // 遍历读取到的文件列表
           files.forEach((filename, fileIndex) => {
-            _that.excelRowList = [];
             if (/.json/.test(filename)) {
               _that.xlsxData[0].push(filename.split('.')[0]);  // 创建表格titleconsole.log(filename);
               // 读取文件内容
               const json = fs.readFileSync(`${floderPath}/${filename}`, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
               Object.keys(jsonData).forEach((key, index) => {
-                _that.cereteFieldAndValue({ jsonItem: jsonData[key], index, fileIndex, key });
+                this.index = this.index + (index > 0 ? 1 : 0);
+                _that.cereteFieldAndValue({ jsonItem: jsonData[key], index: this.index, fileIndex, key });
               });
             }
           });
@@ -107,41 +103,47 @@ export default {
         }
       });
     },
+
     cereteFieldAndValue({ jsonItem, key, index, fileIndex }) {
-      this.index = this.index + index;
-      const __index = this.index;
       if (util.dataTypeDetection(jsonItem) === 'object') {
-        // if (fileIndex === 0) {
-          this.fieldName = `${key}`;
-          let __oldKay = this.fieldName;
-          Object.keys(jsonItem).forEach((key, idx) => {
-            const __key =  `${__oldKay}-${key}`;
-            this.cereteFieldAndValue({ jsonItem: jsonItem[key], fileIndex, index: __index + idx, key: __key });
-          });
-        // }
+        this.fieldName = `${key}`;
+        let __oldKay = this.fieldName;
+        Object.keys(jsonItem).forEach((key, idx) => {
+          this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
+          const __key =  `${__oldKay}-${key}`;
+          this.cereteFieldAndValue({ jsonItem: jsonItem[key], fileIndex, index: this.index, key: __key });
+        });
       }
       if (util.dataTypeDetection(jsonItem) === 'array') {
         this.fieldName = `${key}`;
-        // if (fileIndex === 0) {
-           if (util.dataTypeDetection(this.xlsxData[__index + 1]) === 'array') {
-          this.xlsxData[__index + 1][0] = this.fieldName;
+        if (fileIndex === 0) {
+          if (!this.xlsxData[index + 1]) {
+            this.xlsxData[index + 1] = [this.fieldName];
+            index = index + 1;
           } else {
-            this.xlsxData[__index + 1] = [this.fieldName];
+            this.xlsxData[index + 2] = [this.fieldName];
+            this.index = index + 1;
+            index = index + 2;
           }
-        // }
-        this.xlsxData[__index + 1].push(jsonItem.join('||'));
+        }
+        // console.log(`index ==> ${index}, this.index ===> ${this.index} key ===> ${key}`);
+        this.xlsxData[index].push(jsonItem.join('||'));
         this.fieldName = '';
       }
       if (util.dataTypeDetection(jsonItem) === 'string') {
         this.fieldName = `${key}`;
-        // if (fileIndex === 0) {
-          if (util.dataTypeDetection(this.xlsxData[__index + 1]) === 'array') {
-            this.xlsxData[__index + 1][0] = this.fieldName;
+        if (fileIndex === 0) {
+          if (!this.xlsxData[index + 1]) {
+            this.xlsxData[index + 1] = [this.fieldName];
+            index = index + 1;
           } else {
-            this.xlsxData[__index + 1] = [this.fieldName];
+            this.xlsxData[index + 2] = [this.fieldName];
+            this.index = index + 1;
+            index = index + 2;
           }
-        // }
-        this.xlsxData[__index + 1].push(jsonItem);
+        }
+        // console.log(`index ==> ${index}, this.index ===> ${this.index} key ===> ${key}`);
+        this.xlsxData[index].push(jsonItem);
         this.fieldName = '';
       }
     },

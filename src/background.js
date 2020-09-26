@@ -77,7 +77,7 @@ if (isDevelopment) {
  */
 ipcMain.on('open-directory-dialog', function (event, p) {
   dialog.showOpenDialog({
-    properties: [p]
+    properties: [p, 'multiSelections', 'showHiddenFiles']
   }).then(result => {
     const { canceled, filePaths } = result;
     if (p === 'openFile') {
