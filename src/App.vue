@@ -88,14 +88,15 @@ export default {
           _that.xlsxData.push([_that.excelCusTitle]);
           // 遍历读取到的文件列表
           files.forEach((filename, fileIndex) => {
+            this.index = this.index === 0 ? 0 : 1;
             if (/.json/.test(filename)) {
-              _that.xlsxData[0].push(filename.split('.')[0]);  // 创建表格titleconsole.log(filename);
+              _that.xlsxData[0].push(filename.split('.')[0]);  // 创建表格title
               // 读取文件内容
               const json = fs.readFileSync(`${floderPath}/${filename}`, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
               Object.keys(jsonData).forEach((key, index) => {
                 this.index = this.index + (index > 0 ? 1 : 0);
-                _that.cereteFieldAndValue({ jsonItem: jsonData[key], index: this.index, fileIndex, key });
+                _that.fillXlsxData({ jsonItem: jsonData[key], index: this.index, fileIndex, key });
               });
             }
           });
@@ -104,48 +105,44 @@ export default {
       });
     },
 
-    cereteFieldAndValue({ jsonItem, key, index, fileIndex }) {
+    fillXlsxData({ jsonItem, key, index, fileIndex }) {
       if (util.dataTypeDetection(jsonItem) === 'object') {
         this.fieldName = `${key}`;
         let __oldKay = this.fieldName;
         Object.keys(jsonItem).forEach((key, idx) => {
           this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
           const __key =  `${__oldKay}-${key}`;
-          this.cereteFieldAndValue({ jsonItem: jsonItem[key], fileIndex, index: this.index, key: __key });
+          this.fillXlsxData({ jsonItem: jsonItem[key], fileIndex, index: this.index, key: __key });
         });
       }
       if (util.dataTypeDetection(jsonItem) === 'array') {
         this.fieldName = `${key}`;
-        if (fileIndex === 0) {
-          if (!this.xlsxData[index + 1]) {
-            this.xlsxData[index + 1] = [this.fieldName];
-            index = index + 1;
-          } else {
-            this.xlsxData[index + 2] = [this.fieldName];
-            this.index = index + 1;
-            index = index + 2;
-          }
-        }
-        // console.log(`index ==> ${index}, this.index ===> ${this.index} key ===> ${key}`);
+        index = this.createFieldNamesName(fileIndex, index);
         this.xlsxData[index].push(jsonItem.join('||'));
         this.fieldName = '';
       }
       if (util.dataTypeDetection(jsonItem) === 'string') {
         this.fieldName = `${key}`;
-        if (fileIndex === 0) {
-          if (!this.xlsxData[index + 1]) {
-            this.xlsxData[index + 1] = [this.fieldName];
-            index = index + 1;
-          } else {
-            this.xlsxData[index + 2] = [this.fieldName];
-            this.index = index + 1;
-            index = index + 2;
-          }
-        }
-        // console.log(`index ==> ${index}, this.index ===> ${this.index} key ===> ${key}`);
+        index = this.createFieldNamesName(fileIndex, index);
         this.xlsxData[index].push(jsonItem);
         this.fieldName = '';
       }
+    },
+
+    createFieldNamesName(fileIndex, index) {
+      if (fileIndex === 0) {
+        if (!this.xlsxData[index + 1]) {
+          // 无添加的字段
+          this.xlsxData[index + 1] = [this.fieldName];
+          index = index + 1;
+        } else {
+          // 已存在添加字段,新生成一个列表
+          this.xlsxData[index + 2] = [this.fieldName];
+          this.index = index + 1;
+          index = index + 2;
+        }
+      }
+      return index;
     },
 
     // 生成xlsx

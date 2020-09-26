@@ -1,0 +1,33 @@
+{
+  "common": {
+    "loadingTip": "Loading",
+    "networkErrorTip": "Network error",
+    "noDataTip": "No record found",
+    "retry": "Retry"
+  },
+  "detail": {
+    "favorSuccessTip": "Successfully added",
+    "useForFree": "Use For Free",
+    "premiumUseForFree": "Subscribe for Unlimited Use",
+    "useNow": "Use Now",
+    "viewMore": "View more",
+    "similarTemplatesTitle": "Similar Templates",
+    "freeTrial": "Free Trial"
+  },
+  "home": {
+    "template": "Templates",
+    "seeAll": "See All",
+    "allCategories": "All Categories",
+    "searchTemplates": "Search Templates"
+  },
+  "picture": {
+    "pictures": "Pictures",
+    "myPhotos": "My Photos",
+    "fromCamera": "From camera",
+    "fromPhotos": "From photos",
+    "onlinePictures": "Online pictures",
+    "downloads": "Downloads",
+    "noPictures": "No pictures",
+    "youMayLike": "You may like"
+  }
+}
