@@ -41,7 +41,7 @@ export default {
     createJson(path) {
       // 解析buffer
       const sheetsList = xlsx.parse(`${path}`);
-      console.log(111,sheetsList);
+      // console.log(111,sheetsList);
       // 遍历 sheetList [{name: '', data: []}]
       sheetsList.forEach((sheet, index) => {
         // 只遍历第一个
@@ -71,6 +71,7 @@ export default {
               if (rowItemIndex !== 0) {
                 celList[rowItemIndex - 1].push(rowItem);
               }
+              return;
             }
             celList[rowItemIndex - 1].push(rowItem);
           }
@@ -80,16 +81,40 @@ export default {
           }
         })
       });
+      console.log(celList);
     },
 
     createObjDataStruct() {
-      // const { fieldNamesList } = this;
-      // floderPathsList.forEach((item, index) => {
-      //   let arr = item.split('-');
-      //   if (arr.length === 1) {
-      //     data[item] = ''
-      //   }
-      // });
+      const { celList, fieldNamesList } = this;
+      const jsonData = {};
+      // for (let i = 0, len = celList.length; i < len; i++) {
+        const celItemArr = celList[0];
+        console.log(fieldNamesList, celItemArr);
+        for (let j = 0, len = celItemArr.length; j < len; j++) {
+          let arr = fieldNamesList[j].split('-');
+          let celData = '';
+          let __parentheses = '';
+          if (arr.length > 1) {
+            arr.forEach((folderItem, idx) => {
+              if (idx === arr.length - 1) {
+                if (util.dataTypeDetection(celItemArr[j]) === 'array') {
+                  celData += `${folderItem}: ${celItemArr[j].split('||')}`;
+                } else {
+                  celData += `${folderItem}: ${celItemArr[j]}`;
+                }
+              } else {
+                celData += `${folderItem}: {`;
+              }
+              __parentheses += '}';
+            });
+          } else {
+            jsonData[arr[0]] = celItemArr[j];
+          }
+          
+          celData += __parentheses;
+          console.log(11111, celData, celItemArr[j], j);
+        }
+      // }
     },
 
     selectFloder() {
