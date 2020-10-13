@@ -41,7 +41,6 @@ export default {
     createJson(path) {
       // 解析buffer
       const sheetsList = xlsx.parse(`${path}`);
-      // console.log(111,sheetsList);
       // 遍历 sheetList [{name: '', data: []}]
       sheetsList.forEach((sheet, index) => {
         // 只遍历第一个
@@ -54,7 +53,7 @@ export default {
       });
     },
 
-    // 表格数据进行重组
+    // 表格数据进行重组 获取对应的列
     excelDataRestruct(titleData, sheetDataList) {
       const { fileNameList, celList, fieldNamesList } = this;
       // 生成文件名列表
@@ -81,7 +80,7 @@ export default {
           }
         })
       });
-      console.log(celList);
+      // console.log(celList);
     },
 
     createObjDataStruct() {
@@ -89,39 +88,77 @@ export default {
       const jsonData = {};
       // for (let i = 0, len = celList.length; i < len; i++) {
         const celItemArr = celList[0];
-        console.log(fieldNamesList, celItemArr);
+        console.log(`fieldNamesList ===> ${fieldNamesList}, celItemArr ==> ${celItemArr}`);
         for (let j = 0, len = celItemArr.length; j < len; j++) {
           let arr = fieldNamesList[j].split('-');
-          let celData = '';
           let __parentheses = '';
           if (arr.length > 1) {
-            arr.forEach((folderItem, idx) => {
-              if (idx === arr.length - 1) {
-                if (util.dataTypeDetection(celItemArr[j]) === 'array') {
-                  celData += `${folderItem}: ${celItemArr[j].split('||')}`;
-                } else {
-                  celData += `${folderItem}: ${celItemArr[j]}`;
-                }
-              } else {
-                celData += `${folderItem}: {`;
-              }
-              __parentheses += '}';
-            });
+            this.createObjTree(jsonData, arr, celItemArr, j);
           } else {
-            jsonData[arr[0]] = celItemArr[j];
+            if (util.dataTypeDetection(celItemArr[j]) === 'array') {
+              jsonData[arr[0]] = celItemArr[j].split('||');
+            } else {
+              jsonData[arr[0]] = celItemArr[j];
+            }
           }
-          
-          celData += __parentheses;
-          console.log(11111, celData, celItemArr[j], j);
         }
+        console.log('------------', jsonData);
+        this.createJsonData(jsonData);
       // }
     },
 
+    // 生成对应的对象格式
+    createObjTree(jsonData, arr, celItemArr, j) {
+      let __fieldJson = {};
+      arr.forEach((fieldValue, index) => {
+        if (index === (arr.length - 1)) {
+          this.createItemTree(__fieldJson, fieldValue, celItemArr[j]);
+        } else {
+          this.createItemTree(__fieldJson, fieldValue);
+        }
+      });
+      this.deepMerge(jsonData, __fieldJson);
+    },
+
+    createJsonData(objData) {
+      const jsonData = JSON.stringify(objData);
+    },
+
+    // 根据开发自定义字段生成数据结构
+    createItemTree(obj, key, value) {
+      if (!Object.keys(obj).length) {
+        if (!value) {
+          obj[key] = {}
+        } else {
+          obj[key] = value;
+        }
+      } else {
+        Object.keys(obj).forEach(item => {
+          this.createItemTree(obj[item], key, value)
+        });
+      }
+    },
+
+    // 深合并
+    deepMerge(obj1, obj2) {
+      let key;
+      for (key in obj2) {
+        // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
+        // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
+        obj1[key] = obj1[key] &&
+        obj1[key].toString() === "[object Object]" && (obj2[key] && obj2[key].toString() === "[object Object]")
+          ? this.deepMerge(obj1[key], obj2[key]) : (obj1[key] = obj2[key]);
+      }
+      return obj1;
+    },
+
+    // 选择文件
     selectFloder() {
       ipcRenderer.send('open-directory-dialog', 'openDirectory');
       ipcRenderer.on('select-folder', this.getFolderPath);
     },
 
+    // 获取文件路径
     getFolderPath(event, floderPathsList) {
       const path = floderPathsList[0]; // 获取文件路径
       this.readdir(path);
@@ -156,6 +193,7 @@ export default {
       });
     },
 
+    // 生成对应的 excel
     fillXlsxData({ jsonItem, key, index, fileIndex }) {
       if (util.dataTypeDetection(jsonItem) === 'object') {
         this.fieldName = `${key}`;
@@ -168,19 +206,20 @@ export default {
       }
       if (util.dataTypeDetection(jsonItem) === 'array') {
         this.fieldName = `${key}`;
-        index = this.createFieldNamesName(fileIndex, index);
+        index = this.createFieldNames(fileIndex, index);
         this.xlsxData[index].push(jsonItem.join('||'));
         this.fieldName = '';
       }
       if (util.dataTypeDetection(jsonItem) === 'string') {
         this.fieldName = `${key}`;
-        index = this.createFieldNamesName(fileIndex, index);
+        index = this.createFieldNames(fileIndex, index);
         this.xlsxData[index].push(jsonItem);
         this.fieldName = '';
       }
     },
 
-    createFieldNamesName(fileIndex, index) {
+    // 生成对应的 表格数据 列
+    createFieldNames(fileIndex, index) {
       if (fileIndex === 0) {
         if (!this.xlsxData[index + 1]) {
           // 无添加的字段
