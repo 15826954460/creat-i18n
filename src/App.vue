@@ -12,6 +12,8 @@ import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
 
+const DEFAULT_PATH = 'C:\\Users\\baiyunsong\\Desktop\\';
+
 export default {
   name: 'App',
   data() {
@@ -80,15 +82,13 @@ export default {
           }
         })
       });
-      // console.log(celList);
     },
 
     createObjDataStruct() {
-      const { celList, fieldNamesList } = this;
+      const { celList, fieldNamesList, fileNameList } = this;
       const jsonData = {};
-      // for (let i = 0, len = celList.length; i < len; i++) {
-        const celItemArr = celList[0];
-        console.log(`fieldNamesList ===> ${fieldNamesList}, celItemArr ==> ${celItemArr}`);
+      for (let i = 0, len = celList.length; i < len; i++) {
+        const celItemArr = celList[i];
         for (let j = 0, len = celItemArr.length; j < len; j++) {
           let arr = fieldNamesList[j].split('-');
           let __parentheses = '';
@@ -102,9 +102,8 @@ export default {
             }
           }
         }
-        console.log('------------', jsonData);
-        this.createJsonData(jsonData);
-      // }
+        this.createJsonData(jsonData, fileNameList[i]);
+      }
     },
 
     // 生成对应的对象格式
@@ -120,8 +119,12 @@ export default {
       this.deepMerge(jsonData, __fieldJson);
     },
 
-    createJsonData(objData) {
-      const jsonData = JSON.stringify(objData);
+    createJsonData(objData, jsonFileName) {
+      const dir = `${DEFAULT_PATH}i18n_json`;
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      fs.writeFileSync(`${dir}\\${jsonFileName}.json`, JSON.stringify(objData));
     },
 
     // 根据开发自定义字段生成数据结构
@@ -239,7 +242,7 @@ export default {
     createXlsx() {
       // TODO: 文件名称可选择(默认)
       const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
-      fs.writeFileSync('C:\\Users\\baiyunsong\\Desktop\\i18n.xlsx', buffer);
+      fs.writeFileSync(`${DEFAULT_PATH}i18n.xlsx`, buffer);
     }
   },
 }
