@@ -84,7 +84,6 @@ ipcMain.on('open-directory-dialog', function (event, p) {
       filePaths.length > 0 && event.reply('select-file', result.filePaths);
     }
     if (p === 'openDirectory') {
-      console.log(222, result);
       filePaths.length > 0 && event.reply('select-folder', result.filePaths);
     }
   })

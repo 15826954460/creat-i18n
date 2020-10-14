@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <button class="red"  @click="selectFile"> excel to be JSON </button>
+    <button class="red"  @click="selectXlsx"> excel to be JSON </button>
     <button class="blue"  @click="selectFloder">JSON  to be excel </button>
   </div>
 </template>
@@ -13,12 +13,12 @@ import xlsx from 'node-xlsx';
 import util from '@/utils';
 
 const DEFAULT_PATH = 'C:\\Users\\baiyunsong\\Desktop\\';
+const CUSTOM_TITLE = '字段名称(开发自定义)';
 
 export default {
   name: 'App',
   data() {
     return {
-      excelCusTitle: '字段名称(开发自定义)',
       startIndex: 1,
       xlsxData: [], // 表格数据列表
       fieldName: '',
@@ -30,35 +30,42 @@ export default {
     }
   },
   methods: {
-    selectFile() {
-      // 调用主进程打开文件选择框(选择xlsx)文件
+    /**
+     * @description 选择数据表
+     */
+    selectXlsx() {
+      // 主进程打开文件选择
       ipcRenderer.send('open-directory-dialog', 'openFile');
-      // 接口主进程返回的结果
+      // 接受主进程返回通信
       ipcRenderer.on('select-file', this.getFilePath);
     },
+
+    /**
+     * @description 获取当前文件路径
+     */
     getFilePath(event, filePathsList) {
       const path = filePathsList[0]; // 获取文件路径
-      this.createJson(path);
-    },
-    createJson(path) {
-      // 解析buffer
-      const sheetsList = xlsx.parse(`${path}`);
-      // 遍历 sheetList [{name: '', data: []}]
-      sheetsList.forEach((sheet, index) => {
-        // 只遍历第一个
-        if (index === 0) {
-          const sheetDataList = sheet['data'];
-          const titleData = sheetDataList[0]; // 获取表格第一行(国家名称)
-          this.excelDataRestruct(titleData, sheetDataList);
-          this.createObjDataStruct();
-        }
-      });
+      this.xlsxDataSplit(path);
     },
 
-    // 表格数据进行重组 获取对应的列
+    /**
+     * @description xlsx 数据拆分
+     */
+    xlsxDataSplit(path) {
+      const sheetsList = xlsx.parse(`${path}`); // xlsx buffer 解析
+      // 遍历 sheetList [{ name: '', data: [] }, { name: '', data: [] }]
+      const sheetDataList = sheetsList[0]['data'];
+      const titleData = sheetDataList[0]; // 获取表格第一行(国家名称)
+      this.excelDataRestruct(titleData, sheetDataList);
+      this.createJsonDataStruct();
+    },
+
+    /**
+     * @description 表格数据进行重组 获取对应的列
+     */
     excelDataRestruct(titleData, sheetDataList) {
       const { fileNameList, celList, fieldNamesList } = this;
-      // 生成文件名列表
+      // 生成JSON文件名列表
       titleData.forEach((item, idx) => {
         (idx !== 0) && fileNameList.push(item); 
       });
@@ -76,7 +83,7 @@ export default {
             }
             celList[rowItemIndex - 1].push(rowItem);
           }
-          // 获取自定义字段名
+          // 生成自定义字段列表
           if (rowItemIndex === 0) {
             fieldNamesList.push(rowItem);
           }
@@ -84,7 +91,10 @@ export default {
       });
     },
 
-    createObjDataStruct() {
+    /**
+     * @description 生成单个文件的JSON数据
+     */
+    createJsonDataStruct() {
       const { celList, fieldNamesList, fileNameList } = this;
       const jsonData = {};
       for (let i = 0, len = celList.length; i < len; i++) {
@@ -102,7 +112,7 @@ export default {
             }
           }
         }
-        this.createJsonData(jsonData, fileNameList[i]);
+        this.createJsonFile(jsonData, fileNameList[i]);
       }
     },
 
@@ -119,14 +129,6 @@ export default {
       this.deepMerge(jsonData, __fieldJson);
     },
 
-    createJsonData(objData, jsonFileName) {
-      const dir = `${DEFAULT_PATH}i18n_json`;
-      if (!fs.existsSync(dir)){
-        fs.mkdirSync(dir);
-      }
-      fs.writeFileSync(`${dir}\\${jsonFileName}.json`, JSON.stringify(objData));
-    },
-
     // 根据开发自定义字段生成数据结构
     createItemTree(obj, key, value) {
       if (!Object.keys(obj).length) {
@@ -140,6 +142,14 @@ export default {
           this.createItemTree(obj[item], key, value)
         });
       }
+    },
+
+    createJsonFile(objData, jsonFileName) {
+      const dir = `${DEFAULT_PATH}i18n_json`;
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      fs.writeFileSync(`${dir}\\${jsonFileName}.json`, JSON.stringify(objData));
     },
 
     // 深合并
@@ -161,7 +171,9 @@ export default {
       ipcRenderer.on('select-folder', this.getFolderPath);
     },
 
-    // 获取文件路径
+    /**
+     * @description 获取文件夹路径
+     */
     getFolderPath(event, floderPathsList) {
       const path = floderPathsList[0]; // 获取文件路径
       this.readdir(path);
@@ -176,7 +188,7 @@ export default {
           // TODO: 错误提示代优化
           console.warn(err)
         } else {
-          _that.xlsxData.push([_that.excelCusTitle]);
+          _that.xlsxData.push([CUSTOM_TITLE]);
           // 遍历读取到的文件列表
           files.forEach((filename, fileIndex) => {
             this.index = this.index === 0 ? 0 : 1;
@@ -240,7 +252,6 @@ export default {
 
     // 生成xlsx
     createXlsx() {
-      // TODO: 文件名称可选择(默认)
       const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
       fs.writeFileSync(`${DEFAULT_PATH}i18n.xlsx`, buffer);
     }
