@@ -1,9 +1,11 @@
-import { app, protocol, BrowserWindow, ipcMain, dialog, ipcRenderer } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
 import {
   createProtocol,
 } from 'vue-cli-plugin-electron-builder/lib'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+let win
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{
@@ -14,13 +16,17 @@ protocol.registerSchemesAsPrivileged([{
   }
 }])
 
+// https://www.electronjs.org/docs/api/browser-window
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  win = new BrowserWindow({
     frame: false,
-    resizable: false,
-    width: 900,
+    center: true,
+    resizable: true,
+    width: 800,
     height: 600,
+    minWidth: 500,
+    minHeight: 400,
     webPreferences: {
       nodeIntegration: true,
     }
@@ -28,15 +34,19 @@ function createWindow () {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) {
-      mainWindow.webContents.openDevTools()
+      // win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
     }
   } else {
     createProtocol('app')
     // Load the index.html when not in development
-    mainWindow.loadURL('app://./index.html')
+    win.loadURL('app://./index.html')
   }
+
+  win.on('closed', () => {
+    win = null;
+  });
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -87,4 +97,23 @@ ipcMain.on('open-directory-dialog', function (event, p) {
       filePaths.length > 0 && event.reply('select-folder', result.filePaths);
     }
   })
+})
+
+// 窗口 最小化
+ipcMain.on('window-min', () => { // 收到渲染进程的窗口最小化操作的通知，并调用窗口最小化函数，执行该操作
+  win.minimize();
+})
+
+// 窗口 最大化、恢复
+ipcMain.on('window-max', () => {
+  if(win.isMaximized()){ // 为true表示窗口已最大化
+    win.restore();// 将窗口恢复为之前的状态.
+  }else{
+    win.maximize();
+  }
+})
+
+//  关闭窗口
+ipcMain.on('window-close', () => {
+  win.close();
 })

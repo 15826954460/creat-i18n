@@ -1,7 +1,13 @@
 <template>
   <div id="app">
-    <button class="red"  @click="selectXlsx"> excel to be JSON </button>
-    <button class="blue"  @click="selectFloder">JSON  to be excel </button>
+    <TopNav></TopNav>
+
+    <button @click="selectXlsx" class="__cursor btn excel-to-json">
+      excel to be JSON
+    </button>
+    <button @click="selectFloder" class="__cursor btn json-to-excel">
+      JSON  to be excel
+    </button>
   </div>
 </template>
 
@@ -11,6 +17,7 @@ import fs from 'fs';
 import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
+import TopNav from './components/common/TopNav.vue'
 
 const DEFAULT_PATH = 'C:\\Users\\baiyunsong\\Desktop\\';
 const CUSTOM_TITLE = '字段名称(开发自定义)';
@@ -28,6 +35,9 @@ export default {
       fileNameList: [],
       fieldNamesList: [],
     }
+  },
+  components: {
+    TopNav,
   },
   methods: {
     /**
@@ -262,18 +272,8 @@ export default {
   #app {
     width: 100%;
     height: 100%;
-    background: rgba(133,194,226, 0.2);
-    -webkit-app-region: drag;
-    .red {
-      background-color: lightcoral;
-      border-radius: 4px;
-      overflow: hidden;
-      -webkit-app-region: no-drag;
-    }
-    .blue {
-      background-color: #417FF9;
-      border-radius: 4px;
-      overflow: hidden;
+    background: var(--app-bg-color);
+    .btn {
       -webkit-app-region: no-drag;
     }
   }
