@@ -36,7 +36,7 @@ function createWindow () {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) {
-      // win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
+      win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
     }
   } else {
     createProtocol('app')
