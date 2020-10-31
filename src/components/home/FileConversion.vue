@@ -2,8 +2,8 @@
   <div class="__flex conversion-wrap">
     <ModalMark ref="modalmark" @click="changeFolderName"></ModalMark>
     <p class="__flex __rcfs btn-wrapper">
-      <Btn text="Excel to be Json" class="btn btn-excel-select" @click="selectXlsx"></Btn>
-      <Btn text="Json to be Excel" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
+      <Btn text="Excel to be Json (file)" class="btn btn-excel-select" @click="selectXlsx"></Btn>
+      <Btn text="Json to be Excel (folder)" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
     </p>
     <Dashedline></Dashedline>
     <div class="__flex __rcfs diagram-wrap">
@@ -33,6 +33,8 @@ import ModalMark from '../common/ModalMark.vue';
 const homedir = os.homedir();
 const DEFAULT_PATH = `${homedir}\\Desktop\\`;
 const CUSTOM_TITLE = '字段名称(开发自定义)';
+const TO_JSON = 'TO_JSON';
+const TO_EXCEL = 'TO_EXCEL';
 
 export default {
   name: 'file-conversion-com',
@@ -49,8 +51,8 @@ export default {
       celList: [],
       fileNameList: [],
       fieldNamesList: [],
-      defaultJsonFolderName: 'i18n_json',
-      excelPath: '',
+      defaultJsonFolderName: '',
+      selectFilePath: '',
       isConversioning: false,
       modalmarkRef: '',
     }
@@ -83,9 +85,13 @@ export default {
       this.isConversioning = bool;
     },
 
-    changeFolderName(floderName) {
-      this.defaultJsonFolderName = floderName;
-      this.excelPath && this.xlsxDataSplit(this.excelPath);
+    changeFolderName({ fileName, type }) {
+      this.defaultJsonFolderName = fileName;
+      if (type === TO_JSON) {
+        this.selectFilePath && this.xlsxDataSplit(this.selectFilePath);
+      } else if (type === TO_EXCEL){
+        this.readdir(this.selectFilePath);
+      }
     },
 
     /**
@@ -96,6 +102,7 @@ export default {
         this.$toast.show({ mag: '当前有文件正在转换,请稍后再试' });
         return;
       }
+      this.defaultJsonFolderName = 'i18nJson';
       // 主进程打开文件选择
       ipcRenderer.send('open-directory-dialog', 'openFile');
     },
@@ -116,8 +123,8 @@ export default {
       // 生成 json 之前判断当前文件夹是否已存在
       if (fs.existsSync(dir)) {
         if (!this.modalmarkRef.isShowModalMark) {
-          this.modalmarkRef.handleModalMark();
-          this.excelPath = path;
+          this.modalmarkRef.handleModalMark(true, TO_JSON);
+          this.selectFilePath = path;
           let __timer = setTimeout(() => {
             this.modalmarkRef.$refs.inputRename.focus();
             clearTimeout(__timer);
@@ -197,7 +204,7 @@ export default {
       }
       this.conversionStatusChange(false);
       this.$loading.hidden();
-      this.$toast.show({ msg: '文件转换感谢使用', success: true });
+      this.$toast.show({ msg: '转换完成,感谢使用', success: true });
     },
 
     // 生成对应的对象格式
@@ -252,6 +259,11 @@ export default {
 
     // 选择文件
     selectJsonFloder() {
+      if (this.isConversioning) {
+        this.$toast.show({ mag: '当前有文件正在转换,请稍后再试' });
+        return;
+      }
+      this.defaultJsonFolderName = 'i18nExcel';
       ipcRenderer.send('open-directory-dialog', 'openDirectory');
     },
 
@@ -265,12 +277,30 @@ export default {
 
     // 文件读取
     readdir(floderPath) {
+      this.selectFilePath = floderPath;
+      const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`;
+      if (fs.existsSync(dir)) {
+        if (!this.modalmarkRef.isShowModalMark) {
+          this.modalmarkRef.handleModalMark(true, TO_EXCEL);
+          let __timer = setTimeout(() => {
+            this.modalmarkRef.$refs.inputRename.focus();
+            clearTimeout(__timer);
+            __timer = null;
+          }, 1000);
+        } else {
+          this.$toast.show({ msg: '当前文件已存在,请重新输入' });
+          this.modalmarkRef.$refs.inputRename.focus();
+        }
+        return;
+      }
+      this.modalmarkRef.handleModalMark(false);
+      this.conversionStatusChange(true);
+      this.needShowLoading();
       const _that = this;
       // 根据文件路径读取文件，返回文件列表
       fs.readdir(floderPath, (err, files) => {
         if (err) {
-          // TODO: 错误提示代优化
-          console.warn(err)
+          this.$toast.show({ msg: '文件路径获取失败,请重新尝试' });
         } else {
           _that.xlsxData.push([CUSTOM_TITLE]);
           // 遍历读取到的文件列表
@@ -336,8 +366,12 @@ export default {
 
     // 生成xlsx
     createXlsx() {
+      const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`;
       const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
-      fs.writeFileSync(`${DEFAULT_PATH}i18n.xlsx`, buffer);
+      fs.writeFileSync(dir, buffer);
+      this.conversionStatusChange(false);
+      this.$loading.hidden();
+      this.$toast.show({ msg: '转换完成,感谢使用！', success: true });
     }
   },
 }

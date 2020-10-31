@@ -4,7 +4,7 @@
       <!-- 文件重命名 -->
       <transition name="rename">
         <div class="__abs rename-box" v-show="renameModalShow">
-          <p class="resume-title">{{'当前文件已存在,将根据您的输入重新创建'}}</p>
+          <p class="resume-title">{{'当前文已存在,将根据您的输入重新创建'}}</p>
           <div class="input-box">
             <input ref="inputRename" type="text" placeholder="请输入文件名" v-model="rename" />
           </div>
@@ -30,14 +30,16 @@ export default {
     return {
       isShowModalMark: false,
       renameModalShow: false,
-      rename: ''
+      rename: '',
+      conversionType: '',
     }
   },
 
   methods: {
-    handleModalMark(bool = true) {
+    handleModalMark(bool = true, conversionType = '') {
       this.isShowModalMark = bool;
       this.handleRenameShowStatus(bool);
+      conversionType && (this.conversionType = conversionType);
     },
 
     handleRenameShowStatus(bool = true) {
@@ -54,7 +56,7 @@ export default {
         this.$toast.show({ msg: '请输入文件名' })
         return;
       }
-      this.$emit('click', this.rename.trim());
+      this.$emit('click', { fileName: this.rename.trim(), type: this.conversionType });
       this.rename = '';
     }
 
