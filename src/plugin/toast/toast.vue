@@ -1,6 +1,6 @@
 <template>
   <transition name="modal-fade">
-    <div class="wrap" v-show="showToast">
+    <div class="toast-wrap" v-show="showToast">
       <p class="__flex __rfsc msg-box">
         <i v-if="success === true" class="__inb icon icon-success" />
         <i v-else  class="__inb icon icon-error" />
@@ -25,17 +25,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.wrap {
+.toast-wrap {
   position: fixed;
   z-index: 999;
   left: 50%;
   transform: translateX(-50%);
   margin: 0 auto;
   bottom: 8%;
-  background: rgba(119, 119, 119, 0.9);
-  width: 200px;
+  width: 300px;
   border-radius: 5px;
   color: var(--app-bg-color);
+  background-color: var(--toast-wrap-bg-color);
 }
 
 .msg-box {
@@ -58,7 +58,7 @@ export default {
   }
 
   .message {
-    font-size:14px;
+    font-size: 14px;
   }
 }
 

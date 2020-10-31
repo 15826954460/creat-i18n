@@ -7,7 +7,7 @@ export default {
     document.body.appendChild(instance.$mount().$el);
 
     const toast = {
-      start({ msg = '', autoClose = true, success = false } = {}) {
+      show({ msg = '', autoClose = true, success = false } = {}) {
         instance.message = msg;
         instance.showToast = true;
         instance.success = success;
@@ -20,7 +20,7 @@ export default {
         }
       },
 
-      stop() {
+      hidden() {
         instance.message = '';
         instance.showToast = false;
       },
