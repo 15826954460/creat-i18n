@@ -1,11 +1,20 @@
 <template>
-  <div class="conversion-wrap">
-    <button @click="selectXlsx" class="__cursor btn excel-to-json">
-      excel to be JSON
-    </button>
-    <button @click="selectFloder" class="__cursor btn json-to-excel">
-      JSON  to be excel
-    </button>
+  <div class="__flex conversion-wrap">
+    <p class="__flex __rcfs btn-wrapper">
+      <Btn text="Excel to be Json" class="btn btn-excel-select" @click="selectXlsx"></Btn>
+      <Btn text="Json to be Excel" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
+    </p>
+    <Dashedline></Dashedline>
+    <div class="__flex __rcfs diagram-wrap">
+      <div class="diagram-excel diagram-item">
+        <span class="title">Excel 表格示例</span>
+        <p class="diagram-img"></p>
+      </div>
+      <div class="diagram-json diagram-item">
+        <span class="title">Json 文件示例</span>
+        <p class="diagram-img"></p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -16,12 +25,18 @@ import os from 'os';
 import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
+import Btn from '../common/Button.vue';
+import Dashedline from '../common/Dashedline.vue';
 
 const homedir = os.homedir();
 const DEFAULT_PATH = `${homedir}\\Desktop\\`;
 const CUSTOM_TITLE = '字段名称(开发自定义)';
 
 export default {
+  name: 'file-conversion-com',
+
+  components: { Btn, Dashedline },
+
   data() {
     return {
       startIndex: 1,
@@ -175,7 +190,7 @@ export default {
     },
 
     // 选择文件
-    selectFloder() {
+    selectJsonFloder() {
       ipcRenderer.send('open-directory-dialog', 'openDirectory');
       ipcRenderer.on('select-folder', this.getFolderPath);
     },
@@ -269,5 +284,66 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.conversion-wrap {
+  width: 100%;
+  flex-direction: column;
 
+  .btn-wrapper {
+    margin-bottom: 40px;
+
+    .btn {
+      font-size: 15px;
+      font-weight: bold;
+      padding: 23px 45px;
+    }
+    .btn-excel-select {
+      margin-right: 72px;
+      background-color: var(--home-page-btn-excel-to-json-bg-color);
+      &:hover {
+        background-color: var(--home-page-btn-excel-to-json-bg-color-hover);
+      }
+    }
+    .btn-json-select { 
+      background-color: var(--home-page-btn-json-to-excel-bg-color);
+      &:hover {
+        background-color: var(--home-page-btn-json-to-excel-bg-color-hover);
+      }
+    }
+  }
+
+  .diagram-wrap {
+    width: 100%;
+    margin: 48px auto 0;
+
+    .diagram-item {
+      .title {
+        color: var(--diagram-title-color);
+        font-size: 14px;
+      }
+
+      .diagram-img {
+        height: 190px;
+        width: 400px;
+        border: 1px dashed var(--dashed-line-color);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 16px;
+        background-size: 100% 100%;
+      }
+    }
+
+    .diagram-excel {
+      margin-right: 40px;
+      .diagram-img {
+        background-image: url('../../assets/images/common/excel-diagram.png');
+      }
+    }
+
+    .diagram-json {
+      .diagram-img {
+        background-image: url('../../assets/images/common/json-diagram.png');
+      }
+    }
+  }
+}
 </style>

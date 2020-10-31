@@ -9,17 +9,7 @@
 <script>
 import { ipcRenderer } from 'electron';
 export default {
-  components: {},
-  data() {
-    return {
-
-    }
-  },
-  computed: {},
-  created() {
-    
-  },
-  mounted() {},
+  name: 'top-nav-com',
 
   methods: {
     minimizeWin(){
@@ -37,19 +27,19 @@ export default {
 
 <style scoped lang="scss">
 .nav-wrap {
-  height: 30px;
+  height: 40px;
   -webkit-app-region: drag;
-  background-color: var(--top-nav-bg-color);
+  background-color: var(--nav-bg-color);
   .icon {
     display: inline-block;
-    width: 40px;
+    width: 50px;
     height: 100%;
-    background-size: 20px 10px;
+    background-size: 30px 15px;
     background-repeat: no-repeat;
     background-position: center;
     -webkit-app-region: no-drag;
     &:hover {
-      background-color: var(--top-nav-icon-hover-bg-color);
+      background-color: var(--nav-icon-hover-bg-color);
       -webkit-app-region: no-drag;
     }
   }
