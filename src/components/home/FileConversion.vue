@@ -1,5 +1,6 @@
 <template>
   <div class="__flex conversion-wrap">
+    <ModalMark ref="modalmark" @click="changeFolderName"></ModalMark>
     <p class="__flex __rcfs btn-wrapper">
       <Btn text="Excel to be Json" class="btn btn-excel-select" @click="selectXlsx"></Btn>
       <Btn text="Json to be Excel" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
@@ -27,6 +28,7 @@ import xlsx from 'node-xlsx';
 import util from '@/utils';
 import Btn from '../common/Button.vue';
 import Dashedline from '../common/Dashedline.vue';
+import ModalMark from '../common/ModalMark.vue';
 
 const homedir = os.homedir();
 const DEFAULT_PATH = `${homedir}\\Desktop\\`;
@@ -35,7 +37,7 @@ const CUSTOM_TITLE = '字段名称(开发自定义)';
 export default {
   name: 'file-conversion-com',
 
-  components: { Btn, Dashedline },
+  components: { Btn, Dashedline, ModalMark },
 
   data() {
     return {
@@ -47,21 +49,55 @@ export default {
       celList: [],
       fileNameList: [],
       fieldNamesList: [],
+      defaultJsonFolderName: 'i18n_json',
+      excelPath: '',
+      isConversioning: false,
+      modalmarkRef: '',
     }
   },
   
   mounted() {
+    this.modalmarkRef = this.$refs.modalmark;
+    // 接受主进程返回通信
+    ipcRenderer.on('select-file', this.getFilePath);
+    ipcRenderer.on('select-folder', this.getFolderPath);
   },
 
   methods: {
+    needShowLoading() {
+      let __setp = 0;
+      let __timer = setInterval(() => {
+        if (!this.isConversioning) {
+          clearInterval(__timer);
+          __timer = null;
+        } else if (__setp >= 2000 && this.isConversioning) {
+          this.$loading.show();
+          clearInterval(__timer);
+          __timer = null;
+        }
+        __setp += 200;
+      }, 200);
+    },
+
+    conversionStatusChange(bool) {
+      this.isConversioning = bool;
+    },
+
+    changeFolderName(floderName) {
+      this.defaultJsonFolderName = floderName;
+      this.excelPath && this.xlsxDataSplit(this.excelPath);
+    },
+
     /**
      * @description 选择数据表
      */
     selectXlsx() {
+      if (this.isConversioning) {
+        this.$toast.show({ mag: '当前有文件正在转换,请稍后再试' });
+        return;
+      }
       // 主进程打开文件选择
       ipcRenderer.send('open-directory-dialog', 'openFile');
-      // 接受主进程返回通信
-      ipcRenderer.on('select-file', this.getFilePath);
     },
 
     /**
@@ -76,6 +112,27 @@ export default {
      * @description xlsx 数据拆分
      */
     xlsxDataSplit(path) {
+      const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}`;
+      // 生成 json 之前判断当前文件夹是否已存在
+      if (fs.existsSync(dir)) {
+        if (!this.modalmarkRef.isShowModalMark) {
+          this.modalmarkRef.handleModalMark();
+          this.excelPath = path;
+          let __timer = setTimeout(() => {
+            this.modalmarkRef.$refs.inputRename.focus();
+            clearTimeout(__timer);
+            __timer = null;
+          }, 1000)
+        } else {
+          this.$toast.show({ msg: '当前文件已存在,请重新输入' });
+          this.modalmarkRef.$refs.inputRename.focus();
+        }
+        return;
+      }
+      this.modalmarkRef.handleModalMark(false);
+      this.conversionStatusChange(true);
+      this.needShowLoading();
+
       const sheetsList = xlsx.parse(`${path}`); // xlsx buffer 解析
       // 遍历 sheetList [{ name: '', data: [] }, { name: '', data: [] }]
       const sheetDataList = sheetsList[0]['data'];
@@ -138,6 +195,9 @@ export default {
         }
         this.createJsonFile(jsonData, fileNameList[i]);
       }
+      this.conversionStatusChange(false);
+      this.$loading.hidden();
+      this.$toast.show({ msg: '文件转换感谢使用', success: true });
     },
 
     // 生成对应的对象格式
@@ -169,7 +229,8 @@ export default {
     },
 
     createJsonFile(objData, jsonFileName) {
-      const dir = `${DEFAULT_PATH}i18n_json`;
+      // 桌面生成 i18n_json 文件夹
+      const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}`;
       if (!fs.existsSync(dir)){
         fs.mkdirSync(dir);
       }
@@ -192,7 +253,6 @@ export default {
     // 选择文件
     selectJsonFloder() {
       ipcRenderer.send('open-directory-dialog', 'openDirectory');
-      ipcRenderer.on('select-folder', this.getFolderPath);
     },
 
     /**
