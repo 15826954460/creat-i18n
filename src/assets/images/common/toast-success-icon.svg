@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>icon/状态/right</title>
+    <desc>Created with Sketch.</desc>
+    <g id="icon/状态/right" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g>
+            <circle id="椭圆形" fill="#4BC159" cx="24" cy="24" r="24"></circle>
+            <path d="M28,32 L28,9 C28,7.34314575 29.3431458,6 31,6 C32.6568542,6 34,7.34314575 34,9 L34,35 C34,36.6568542 32.6568542,38 31,38 L19,38 C17.3431458,38 16,36.6568542 16,35 C16,33.3431458 17.3431458,32 19,32 L28,32 Z" id="形状结合" fill="#FFFFFF" transform="translate(25.000000, 22.000000) rotate(-315.000000) translate(-25.000000, -22.000000) "></path>
+        </g>
+    </g>
+</svg>
