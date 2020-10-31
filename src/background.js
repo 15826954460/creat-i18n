@@ -23,10 +23,10 @@ function createWindow () {
     frame: false,
     center: true,
     resizable: true,
-    width: 800,
+    width: 916,
     height: 600,
-    minWidth: 500,
-    minHeight: 400,
+    minWidth: 916,
+    minHeight: 600,
     webPreferences: {
       nodeIntegration: true,
     }
