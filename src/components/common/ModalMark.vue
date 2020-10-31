@@ -1,6 +1,7 @@
 <template>
   <transition name="modalmark">
     <div class="modal-mark-container" v-show="isShowModalMark">
+      <i class="__cursor close-icon" @click="cancel()"></i>
       <!-- 文件重命名 -->
       <transition name="rename">
         <div class="__abs rename-box" v-show="renameModalShow">
@@ -28,7 +29,7 @@ export default {
 
   data() {
     return {
-      isShowModalMark: false,
+      isShowModalMark: true,
       renameModalShow: false,
       rename: '',
       conversionType: '',
@@ -73,6 +74,21 @@ export default {
   top: 0;
   z-index: 99;
   background: var(--modal-mark-container-bg-color);
+
+  .close-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-block;
+    right: 5px;
+    top: 5px;
+    position: absolute;
+    background-color: var(--modal-mark-colse-icon-bg-color);
+    background-image: url('../../assets/images/common/icon-close.svg');
+    background-size: 60% 60%;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
 
   .rename-box {
     background: var(--app-bg-color);
