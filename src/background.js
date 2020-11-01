@@ -94,7 +94,10 @@ if (isDevelopment) {
  */
 ipcMain.on('open-directory-dialog', function (event, p) {
   dialog.showOpenDialog({
-    properties: [p, 'multiSelections', 'showHiddenFiles']
+    properties: [p, 'showHiddenFiles'],
+    filters: [
+      { name: 'Custom File Type', extensions: [ p === 'openFile' ? 'xlsx' : '*'] },
+    ]
   }).then(result => {
     const { canceled, filePaths } = result;
     if (p === 'openFile') {
