@@ -34,7 +34,7 @@ function createWindow () {
     }
   })
 
-  const { NODE_ENV, VUE_APP_ENV } = process.env;
+  const { VUE_APP_ENV } = process.env;
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -42,7 +42,7 @@ function createWindow () {
     // if (!process.env.IS_TEST) {
       // win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
     // }
-    if (NODE_ENV === 'development' && VUE_APP_ENV === 'development') {
+    if (VUE_APP_ENV === 'development') {
       win.webContents.openDevTools();
     }
   } else {

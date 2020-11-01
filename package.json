@@ -7,6 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "elec:dev": "vue-cli-service electron:serve --mode development",
+    "elec:test": "vue-cli-service electron:serve --mode production",
     "elec:build": "vue-cli-service electron:build --mode production",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
