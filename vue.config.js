@@ -6,4 +6,10 @@ module.exports = {
   devServer: {
     port: 10044,
   },
+  chainWebpack: config => {
+    config.resolve.alias
+      .set('@', resolve('src'))
+      .set('src', resolve('src'))
+      .set('components', resolve('src/components'));
+  }
 }
