@@ -1,4 +1,5 @@
 import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
+import path from 'path';
 import {
   createProtocol,
 } from 'vue-cli-plugin-electron-builder/lib'
@@ -27,6 +28,7 @@ function createWindow () {
     height: 600,
     minWidth: 916,
     minHeight: 600,
+    icon: path.join(__static, 'favicon.ico'),
     webPreferences: {
       nodeIntegration: true,
     }
@@ -36,7 +38,7 @@ function createWindow () {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) {
-      win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
+      // win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
     }
   } else {
     createProtocol('app')

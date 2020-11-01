@@ -29,7 +29,7 @@ export default {
 
   data() {
     return {
-      isShowModalMark: true,
+      isShowModalMark: false,
       renameModalShow: false,
       rename: '',
       conversionType: '',
