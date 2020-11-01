@@ -41,12 +41,12 @@ See [electron](https://juejin.im/post/6844903878429769742)
 1、项目根目录下新建build文件，放入logo icon [相关规则限制参考](https://www.electron.build/configuration/nsis)
 
 ### 已完成
-[x] 多个 JSON 文件转 EXCEL
-[x] EXCEL 文件转 JSON
-[x] 转换过程中禁止继续选择文件转换限制
-[x] 针对已有的文件添加提示
+- [x] 多个 JSON 文件转 EXCEL
+- [x] EXCEL 文件转 JSON
+- [x] 转换过程中禁止继续选择文件转换限制
+- [x] 针对已有的文件添加提示
 
 ### 后续优化
-[ ] JSON 示意图优化
-[ ] 编写说明文档
-[ ] github 补充完善
+- [ ] JSON 示意图优化
+- [ ] 编写说明文档
+- [ ] github 补充完善
