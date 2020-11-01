@@ -1,13 +1,13 @@
 {
-  "name": "creI18n",
+  "name": "i18n_manage",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "elec:dev": "vue-cli-service electron:serve",
-    "elec:build": "vue-cli-service electron:build",
+    "elec:dev": "vue-cli-service electron:serve --mode development",
+    "elec:build": "vue-cli-service electron:build --mode production",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
