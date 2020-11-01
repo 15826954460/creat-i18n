@@ -46,18 +46,16 @@ export default {
 
   data() {
     return {
-      startIndex: 1,
-      xlsxData: [], // 表格数据列表
       fieldName: '',
       index: 0,
-      fload: false,
+      xlsxData: [], // 表格数据列表
       celList: [],
       fileNameList: [],
       fieldNamesList: [],
       defaultJsonFolderName: '',
       selectFilePath: '',
-      isConversioning: false,
       modalmarkRef: '',
+      isConversioning: false,
     }
   },
   
@@ -93,7 +91,7 @@ export default {
       if (type === TO_JSON) {
         this.selectFilePath && this.xlsxDataSplit(this.selectFilePath);
       } else if (type === TO_EXCEL){
-        this.readdir(this.selectFilePath);
+        this.selectFilePath && this.readdir(this.selectFilePath);
       }
     },
 
@@ -275,12 +273,12 @@ export default {
      */
     getFolderPath(event, floderPathsList) {
       const path = floderPathsList[0]; // 获取文件路径
+      this.selectFilePath = path;
       this.readdir(path);
     },
 
     // 文件读取
     readdir(floderPath) {
-      this.selectFilePath = floderPath;
       const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`;
       if (fs.existsSync(dir)) {
         if (!this.modalmarkRef.isShowModalMark) {
@@ -310,7 +308,7 @@ export default {
           files.forEach((filename, fileIndex) => {
             this.index = this.index === 0 ? 0 : 1;
             if (/.json/.test(filename)) {
-              _that.xlsxData[0].push(filename.split('.')[0]);  // 创建表格title
+              _that.xlsxData[0].push(filename.split('.')[0]);  // 创建表格title(国家码)
               // 读取文件内容
               const json = fs.readFileSync(`${floderPath}/${filename}`, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
@@ -327,13 +325,15 @@ export default {
 
     // 生成对应的 excel
     fillXlsxData({ jsonItem, key, index, fileIndex }) {
+      console.log('fillXlsxData', index, this.xlsxData[index]);
       if (util.dataTypeDetection(jsonItem) === 'object') {
         this.fieldName = `${key}`;
         let __oldKay = this.fieldName;
         Object.keys(jsonItem).forEach((key, idx) => {
           this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
           const __key =  `${__oldKay}-${key}`;
-          this.fillXlsxData({ jsonItem: jsonItem[key], fileIndex, index: this.index, key: __key });
+          // this.fillXlsxData({ jsonItem: jsonItem[key], fileIndex, index: this.index, key: __key });
+          this.fillXlsxData({ jsonItem: jsonItem[key], index: this.index, fileIndex, key: __key });
         });
       }
       if (util.dataTypeDetection(jsonItem) === 'array') {
@@ -367,11 +367,20 @@ export default {
       return index;
     },
 
+    resetSomeData() {
+      this.celList = [];
+      this.fileNameList = [];
+      this.fieldNamesList = [];
+      this.xlsxData = [];
+      this.index = 0;
+    },
+
     // 生成xlsx
     createXlsx() {
       const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`;
       const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
       fs.writeFileSync(dir, buffer);
+      this.resetSomeData();
       this.conversionStatusChange(false);
       this.$loading.hidden();
       this.$toast.show({ msg: '转换完成,感谢使用！', success: true });

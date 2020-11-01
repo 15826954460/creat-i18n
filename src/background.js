@@ -28,7 +28,7 @@ function createWindow () {
     height: 600,
     minWidth: 916,
     minHeight: 600,
-    icon: path.join(__dirname, 'favicon.ico'), // https://www.electron.build/icons
+    icon: path.join(__static, 'favicon.ico'),
     webPreferences: {
       nodeIntegration: true,
     }
