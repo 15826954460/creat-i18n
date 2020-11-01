@@ -332,7 +332,6 @@ export default {
         Object.keys(jsonItem).forEach((key, idx) => {
           this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
           const __key =  `${__oldKay}-${key}`;
-          // this.fillXlsxData({ jsonItem: jsonItem[key], fileIndex, index: this.index, key: __key });
           this.fillXlsxData({ jsonItem: jsonItem[key], index: this.index, fileIndex, key: __key });
         });
       }
