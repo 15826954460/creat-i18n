@@ -1,7 +1,9 @@
 {
   "name": "i18n_manage",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
+  "description": "A table and json file converter",
+  "author": "Aram",
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",

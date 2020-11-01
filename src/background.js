@@ -28,7 +28,7 @@ function createWindow () {
     height: 600,
     minWidth: 916,
     minHeight: 600,
-    icon: path.join(__static, 'favicon.ico'),
+    icon: path.join(__dirname, 'favicon.ico'), // https://www.electron.build/icons
     webPreferences: {
       nodeIntegration: true,
     }
@@ -39,9 +39,6 @@ function createWindow () {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    // if (!process.env.IS_TEST) {
-      // win.webContents.openDevTools() // 打开调试工具会阻止win.close事件
-    // }
     if (VUE_APP_ENV === 'development') {
       win.webContents.openDevTools();
     }
@@ -49,6 +46,11 @@ function createWindow () {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
+  }
+
+  // Mac OS custom Dock Icon
+  if (process.platform === 'darwin') {
+    // app.dock.setIcon(path.join(__dirname, 'assets/images/facetime.png'));
   }
 
   win.on('closed', () => {

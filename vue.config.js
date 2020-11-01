@@ -17,5 +17,20 @@ module.exports = {
       .set('@', resolve('src'))
       .set('src', resolve('src'))
       .set('components', resolve('src/components'));
+  },
+  // https://nklayman.github.io/vue-cli-plugin-electron-builder/guide/configuration.html
+  pluginOptions: {
+    electronBuilder: {
+      builderOptions: {
+        win: {
+          target: ['nsis', 'zip'],
+        },
+        // https://www.electron.build/configuration/nsis
+        nsis: {
+          artifactName: '${productName}-${version}.${ext}',
+        },
+        productName: 'i18n_manage'
+      }
+    }
   }
 }
