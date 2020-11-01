@@ -6,11 +6,14 @@
       <Btn text="Json to be Excel (folder)" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
     </p>
     <Dashedline></Dashedline>
-    <div class="__flex __rcfs diagram-wrap">
+    <div class="__flex __rcfe diagram-wrap">
       <div class="diagram-excel diagram-item">
         <span class="title">Excel 表格示例</span>
         <p class="diagram-img"></p>
       </div>
+      <p class="__flex __ccc conversion-icon-wrap">
+        <i class="__inb conversion-icon"></i>
+      </p>
       <div class="diagram-json diagram-item">
         <span class="title">Json 文件示例</span>
         <p class="diagram-img"></p>
@@ -409,6 +412,18 @@ export default {
     width: 100%;
     margin: 48px auto 0;
 
+    .conversion-icon-wrap {
+      width: 40px;
+      height: 190px;
+    }
+    .conversion-icon {
+      height: 20px;
+      width: 40px;
+      background: url('../../assets/images/common/conversion-icon.svg');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+    }
+
     .diagram-item {
       .title {
         color: var(--diagram-title-color);
@@ -423,11 +438,11 @@ export default {
         overflow: hidden;
         margin-top: 16px;
         background-size: 100% 100%;
+        flex-shrink: 0;
       }
     }
 
     .diagram-excel {
-      margin-right: 40px;
       .diagram-img {
         background-image: url('../../assets/images/common/excel-diagram.png');
       }
