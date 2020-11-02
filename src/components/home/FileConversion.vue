@@ -2,8 +2,9 @@
   <div class="__flex conversion-wrap">
     <ModalMark ref="modalmark" @click="changeFolderName"></ModalMark>
     <p class="__flex __rcfs btn-wrapper">
-      <Btn text="Excel to be Json (file)" class="btn btn-excel-select" @click="selectXlsx"></Btn>
-      <Btn text="Json to be Excel (folder)" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
+      <Btn text="Create excel Template" class="btn btn-excel-select" @click="createDefaultExcelTemplate"></Btn>
+      <Btn text="Excel to be Json" class="btn btn-excel-select" @click="selectXlsx"></Btn>
+      <Btn text="Json to be Excel" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
     </p>
     <Dashedline></Dashedline>
     <div class="__flex __rcfe diagram-wrap">
@@ -29,6 +30,7 @@ import os from 'os';
 import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
+import { mapState, mapMutations } from 'vuex';
 import Btn from '../common/Button.vue';
 import Dashedline from '../common/Dashedline.vue';
 import ModalMark from '../common/ModalMark.vue';
@@ -43,6 +45,10 @@ export default {
   name: 'file-conversion-com',
 
   components: { Btn, Dashedline, ModalMark },
+
+  computed: {
+    ...mapState(['countriesList']),
+  },
 
   data() {
     return {
@@ -67,6 +73,25 @@ export default {
   },
 
   methods: {
+    createDefaultExcelTemplate() {
+      if (this.isConversioning) {
+        this.$toast.show({ mag: '当前有文件正在转换,请稍后再试' });
+        return;
+      }
+      let __xlsxData = [];
+      __xlsxData.push([CUSTOM_TITLE])
+      this.conversionStatusChange(true);
+      this.needShowLoading();
+      this.countriesList.forEach(item => {
+        __xlsxData[0].push(item.code);
+      });
+      const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`; // 待修改
+      const buffer = xlsx.build([{ name: "i18n", data: __xlsxData }]);
+      fs.writeFileSync(dir, buffer);
+      this.conversionStatusChange(false);
+      this.$toast.show({ msg: '转换完成,感谢使用！', success: true });
+    },
+
     needShowLoading() {
       let __setp = 0;
       let __timer = setInterval(() => {
@@ -325,7 +350,6 @@ export default {
 
     // 生成对应的 excel
     fillXlsxData({ jsonItem, key, index, fileIndex }) {
-      console.log('fillXlsxData', index, this.xlsxData[index]);
       if (util.dataTypeDetection(jsonItem) === 'object') {
         this.fieldName = `${key}`;
         let __oldKay = this.fieldName;
@@ -399,10 +423,10 @@ export default {
     .btn {
       font-size: 15px;
       font-weight: bold;
-      padding: 23px 45px;
+      padding: 23px 40px;
     }
     .btn-excel-select {
-      margin-right: 72px;
+      margin-right: 40px;
       background-color: var(--home-page-btn-excel-to-json-bg-color);
       &:hover {
         background-color: var(--home-page-btn-excel-to-json-bg-color-hover);
