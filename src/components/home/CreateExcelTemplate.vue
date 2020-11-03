@@ -1,5 +1,5 @@
 <template>
-  <Btn text="Create default excel" class="btn" @click="createDefaultExcelTemplate"></Btn>
+  <Btn text="Create default excel" class="create-excel-btn" @click="createDefaultExcelTemplate"></Btn>
 </template>
 
 <script>
@@ -59,10 +59,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.btn {
-  font-size: 15px;
-  font-weight: bold;
-  padding: 20px 40px;
+.create-excel-btn {
   background: var(--btn-create-default-tem-bg-color);
 
   &:hover {
