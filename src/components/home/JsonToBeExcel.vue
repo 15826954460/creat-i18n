@@ -32,6 +32,7 @@ export default {
 
   data() {
     return {
+      isConversioning: false,
       defaultJsonFolderName: 'i18nExcel',
       selectFilePath: '',
       index: 0,
@@ -64,7 +65,9 @@ export default {
       this.readdir();
     },
 
-        // 文件读取
+    /**
+     * @description 文件读取
+     */
     readdir() {
       const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`;
       if (fs.existsSync(dir)) {
@@ -110,7 +113,9 @@ export default {
       });
     },
 
-        // 生成对应的 excel
+    /**
+     * @description 生成对应的 excel
+     */
     fillXlsxData({ jsonItem, key, index, fileIndex }) {
       if (util.dataTypeDetection(jsonItem) === 'object') {
         this.fieldName = `${key}`;
@@ -135,7 +140,10 @@ export default {
       }
     },
 
-    // 生成对应的 表格数据 列
+    /**
+     * @description 生成对应的 表格数据 列
+     * @param
+     */
     createFieldNames(fileIndex, index) {
       if (fileIndex === 0) {
         if (!this.xlsxData[index + 1]) {
@@ -152,12 +160,9 @@ export default {
       return index;
     },
 
-    resetSomeData() {
-      this.xlsxData = [];
-      this.index = 0;
-    },
-
-    // 生成xlsx
+    /**
+     * @description 生成xlsx
+     */
     createXlsx() {
       const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`;
       const buffer = xlsx.build([{ name: "i18n", data: this.xlsxData }]); // Returns a buffer
@@ -166,8 +171,17 @@ export default {
       this.conversionStatusChange(false); // mixins
       this.$loading.hidden();
       this.$toast.show({ msg: '转换完成,感谢使用！', success: true });
-    }
-  }
+    },
+
+    /**
+     * @description 重置数据
+     */
+    resetSomeData() {
+      this.xlsxData = [];
+      this.index = 0;
+    },
+
+  },
 }
 </script>
 

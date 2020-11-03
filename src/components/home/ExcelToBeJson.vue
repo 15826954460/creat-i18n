@@ -66,7 +66,7 @@ export default {
       this.xlsxDataSplit(path);
     },
 
-        /**
+    /**
      * @description xlsx 数据拆分
      */
     xlsxDataSplit() {
@@ -98,7 +98,7 @@ export default {
       this.createJsonDataStruct();
     },
 
-        /**
+    /**
      * @description 表格数据进行重组 获取对应的列
      */
     excelDataRestruct(titleData, sheetDataList) {
@@ -129,7 +129,7 @@ export default {
       });
     },
 
-        /**
+    /**
      * @description 生成单个文件的JSON数据
      */
     createJsonDataStruct() {
@@ -157,7 +157,9 @@ export default {
       this.$toast.show({ msg: '转换完成,感谢使用', success: true });
     },
 
-    // 生成对应的对象格式
+    /**
+     * @description 生成对应的对象格式
+     */
     createObjTree(jsonData, arr, celItemArr, j) {
       let __fieldJson = {};
       arr.forEach((fieldValue, index) => {
@@ -170,7 +172,24 @@ export default {
       this.deepMerge(jsonData, __fieldJson);
     },
 
-        // 根据开发自定义字段生成数据结构
+    /**
+     * @description 深合并
+     */
+    deepMerge(obj1, obj2) {
+      let key;
+      for (key in obj2) {
+        // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
+        // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
+        obj1[key] = obj1[key] &&
+        obj1[key].toString() === "[object Object]" && (obj2[key] && obj2[key].toString() === "[object Object]")
+          ? this.deepMerge(obj1[key], obj2[key]) : (obj1[key] = obj2[key]);
+      }
+      return obj1;
+    },
+
+    /**
+     * @description 根据开发自定义字段生成数据结构
+     */
     createItemTree(obj, key, value) {
       if (!Object.keys(obj).length) {
         if (!value) {
@@ -201,18 +220,6 @@ export default {
       this.fieldNamesList = [];
     },
 
-        // 深合并
-    deepMerge(obj1, obj2) {
-      let key;
-      for (key in obj2) {
-        // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
-        // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
-        obj1[key] = obj1[key] &&
-        obj1[key].toString() === "[object Object]" && (obj2[key] && obj2[key].toString() === "[object Object]")
-          ? this.deepMerge(obj1[key], obj2[key]) : (obj1[key] = obj2[key]);
-      }
-      return obj1;
-    },
   }
 }
 </script>
