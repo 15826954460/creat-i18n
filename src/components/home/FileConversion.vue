@@ -2,7 +2,7 @@
   <div class="__flex conversion-wrap">
     <ModalMark ref="modalmark" @click="changeFolderName"></ModalMark>
     <p class="__flex __rcfs btn-wrapper">
-      <Btn text="Create excel Template" class="btn btn-excel-select" @click="createDefaultExcelTemplate"></Btn>
+      <CreateExcelTem class="create-default-excel"/>
       <Btn text="Excel to be Json" class="btn btn-excel-select" @click="selectXlsx"></Btn>
       <Btn text="Json to be Excel" class="btn btn-json-select" @click="selectJsonFloder"></Btn>
     </p>
@@ -30,10 +30,11 @@ import os from 'os';
 import path from 'path';
 import xlsx from 'node-xlsx';
 import util from '@/utils';
-import { mapState, mapMutations } from 'vuex';
+import mixinsConver from '@/mixins/file-conversion.js';
 import Btn from '../common/Button.vue';
 import Dashedline from '../common/Dashedline.vue';
 import ModalMark from '../common/ModalMark.vue';
+import CreateExcelTem from './CreateExcelTemplate';
 
 const homedir = os.homedir();
 const DEFAULT_PATH = `${homedir}\\Desktop\\`;
@@ -44,11 +45,9 @@ const TO_EXCEL = 'TO_EXCEL';
 export default {
   name: 'file-conversion-com',
 
-  components: { Btn, Dashedline, ModalMark },
+  components: { Btn, Dashedline, ModalMark, CreateExcelTem },
 
-  computed: {
-    ...mapState(['countriesList']),
-  },
+  mixins: [mixinsConver],
 
   data() {
     return {
@@ -73,44 +72,6 @@ export default {
   },
 
   methods: {
-    createDefaultExcelTemplate() {
-      if (this.isConversioning) {
-        this.$toast.show({ mag: '当前有文件正在转换,请稍后再试' });
-        return;
-      }
-      let __xlsxData = [];
-      __xlsxData.push([CUSTOM_TITLE])
-      this.conversionStatusChange(true);
-      this.needShowLoading();
-      this.countriesList.forEach(item => {
-        __xlsxData[0].push(item.code);
-      });
-      const dir = `${DEFAULT_PATH}${this.defaultJsonFolderName}.xlsx`; // 待修改
-      const buffer = xlsx.build([{ name: "i18n", data: __xlsxData }]);
-      fs.writeFileSync(dir, buffer);
-      this.conversionStatusChange(false);
-      this.$toast.show({ msg: '转换完成,感谢使用！', success: true });
-    },
-
-    needShowLoading() {
-      let __setp = 0;
-      let __timer = setInterval(() => {
-        if (!this.isConversioning) {
-          clearInterval(__timer);
-          __timer = null;
-        } else if (__setp >= 2000 && this.isConversioning) {
-          this.$loading.show();
-          clearInterval(__timer);
-          __timer = null;
-        }
-        __setp += 200;
-      }, 200);
-    },
-
-    conversionStatusChange(bool) {
-      this.isConversioning = bool;
-    },
-
     changeFolderName({ fileName, type }) {
       this.defaultJsonFolderName = fileName;
       if (type === TO_JSON) {
@@ -423,8 +384,13 @@ export default {
     .btn {
       font-size: 15px;
       font-weight: bold;
-      padding: 23px 40px;
+      padding: 20px 40px;
     }
+
+    .create-default-excel {
+      margin-right: 40px;
+    }
+
     .btn-excel-select {
       margin-right: 40px;
       background-color: var(--home-page-btn-excel-to-json-bg-color);
