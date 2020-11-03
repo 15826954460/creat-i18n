@@ -1,5 +1,9 @@
 export default {
   methods: {
+    changeDefaultFileName(fileName) {
+      this.defaultJsonFolderName = fileName;
+    },
+
     conversionStatusChange(bool) {
       this.isConversioning = bool;
     },

@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       isConversioning: false,
-      defaultJsonFolderName: '',
+      defaultJsonFolderName: 'i18nJson',
       selectFilePath: '',
       celList: [],
       fileNameList: [],
@@ -40,18 +40,11 @@ export default {
     }
   },
 
-  computed: {},
-
-  created() {},
-
   mounted() {
     ipcRenderer.on('select-file', this.getFilePath);
   },
 
   methods: {
-    changeDefaultFileName(fileName) {
-      this.defaultJsonFolderName = fileName;
-    },
     /**
      * @description 选择数据表
      */
@@ -60,7 +53,6 @@ export default {
         this.$toast.show({ mag: '当前有文件正在转换,请稍后再试' });
         return;
       }
-      this.defaultJsonFolderName = 'i18nJson';
       // 主进程打开文件选择
       ipcRenderer.send('open-directory-dialog', 'openFile');
     },
@@ -95,8 +87,8 @@ export default {
         return;
       }
       this.modalmarkRef.handleModalMark(false);
-      this.conversionStatusChange(true);
-      this.needShowLoading();
+      this.conversionStatusChange(true); // mixins
+      this.needShowLoading(); // mixins
 
       const sheetsList = xlsx.parse(`${this.selectFilePath}`); // xlsx buffer 解析
       // 遍历 sheetList [{ name: '', data: [] }, { name: '', data: [] }]
@@ -160,7 +152,7 @@ export default {
         }
         this.createJsonFile(jsonData, fileNameList[i]);
       }
-      this.conversionStatusChange(false);
+      this.conversionStatusChange(false); // mixins
       this.$loading.hidden();
       this.$toast.show({ msg: '转换完成,感谢使用', success: true });
     },
@@ -200,6 +192,13 @@ export default {
         fs.mkdirSync(dir);
       }
       fs.writeFileSync(`${dir}\\${jsonFileName}.json`, JSON.stringify(objData));
+      this.resetSomeData();
+    },
+
+    resetSomeData() {
+      this.celList = [];
+      this.fileNameList = [];
+      this.fieldNamesList = [];
     },
 
         // 深合并
