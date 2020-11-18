@@ -1,6 +1,6 @@
 export default {
   methods: {
-    changeDefaultFileName(fileName) {
+    changeDefaultFileName(fileName = '') {
       this.defaultJsonFolderName = fileName;
     },
 

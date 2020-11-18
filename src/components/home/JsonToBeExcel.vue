@@ -103,7 +103,7 @@ export default {
               const json = fs.readFileSync(`${_that.selectFilePath}/${filename}`, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
               Object.keys(jsonData).forEach((key, index) => {
-                this.index = this.index + (index > 0 ? 1 : 0);
+                // this.index = this.index + (index > 0 ? 1 : 0);
                 _that.fillXlsxData({ jsonItem: jsonData[key], index: this.index, fileIndex, key });
               });
             }
@@ -116,14 +116,31 @@ export default {
     /**
      * @description 生成对应的 excel
      */
-    fillXlsxData({ jsonItem, key, index, fileIndex }) {
+    fillXlsxData({ jsonItem, key, index, fileIndex, addOne }) {
       if (util.dataTypeDetection(jsonItem) === 'object') {
         this.fieldName = `${key}`;
         let __oldKay = this.fieldName;
-        Object.keys(jsonItem).forEach((key, idx) => {
-          this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
+        const keys = Object.keys(jsonItem);
+        keys.forEach((key, idx) => {
           const __key =  `${__oldKay}-${key}`;
-          this.fillXlsxData({ jsonItem: jsonItem[key], index: this.index, fileIndex, key: __key });
+          // this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
+          this.index = (index + idx) < this.index ? this.index : index + idx;
+          if (idx === keys.length - 1) {
+            this.fillXlsxData({
+              jsonItem: jsonItem[key],
+              index: this.index,
+              fileIndex,
+              key: __key,
+              addOne: true,
+            });
+          } else {
+            this.fillXlsxData({
+              jsonItem: jsonItem[key],
+              index: this.index,
+              fileIndex,
+              key: __key,
+            });
+          }
         });
       }
       if (util.dataTypeDetection(jsonItem) === 'array') {
@@ -131,18 +148,23 @@ export default {
         index = this.createFieldNames(fileIndex, index);
         this.xlsxData[index].push(jsonItem.join('||'));
         this.fieldName = '';
+        if (addOne) {
+          this.index += 1;
+        }
       }
       if (util.dataTypeDetection(jsonItem) === 'string') {
         this.fieldName = `${key}`;
         index = this.createFieldNames(fileIndex, index);
         this.xlsxData[index].push(jsonItem);
         this.fieldName = '';
+        if (addOne) {
+          this.index += 1;
+        }
       }
     },
 
     /**
      * @description 生成对应的 表格数据 列
-     * @param
      */
     createFieldNames(fileIndex, index) {
       if (fileIndex === 0) {
@@ -153,7 +175,6 @@ export default {
         } else {
           // 已存在添加字段,新生成一个列表
           this.xlsxData[index + 2] = [this.fieldName];
-          this.index = index + 1;
           index = index + 2;
         }
       }
@@ -179,6 +200,8 @@ export default {
     resetSomeData() {
       this.xlsxData = [];
       this.index = 0;
+      this.isConversioning = false;
+      this.changeDefaultFileName();
     },
 
   },
