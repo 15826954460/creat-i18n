@@ -201,7 +201,6 @@ export default {
       this.xlsxData = [];
       this.index = 0;
       this.isConversioning = false;
-      this.changeDefaultFileName();
     },
 
   },
