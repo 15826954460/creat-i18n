@@ -134,8 +134,8 @@ export default {
      */
     createJsonDataStruct() {
       const { celList, fieldNamesList, fileNameList } = this;
-      const jsonData = {};
       for (let i = 0, len = celList.length; i < len; i++) {
+        const jsonData = {};
         const celItemArr = celList[i];
         for (let j = 0, len = celItemArr.length; j < len; j++) {
           let arr = fieldNamesList[j].split('-');
