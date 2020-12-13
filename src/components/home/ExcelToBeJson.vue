@@ -139,7 +139,6 @@ export default {
         const celItemArr = celList[i];
         for (let j = 0, len = celItemArr.length; j < len; j++) {
           let arr = fieldNamesList[j].split('-');
-          let __parentheses = '';
           if (arr.length > 1) {
             this.createObjTree(jsonData, arr, celItemArr, j);
           } else {
@@ -155,6 +154,7 @@ export default {
       this.conversionStatusChange(false); // mixins
       this.$loading.hidden();
       this.$toast.show({ msg: '转换完成,感谢使用', success: true });
+      this.resetSomeData();
     },
 
     /**
@@ -211,7 +211,6 @@ export default {
         fs.mkdirSync(dir);
       }
       fs.writeFileSync(`${dir}\\${jsonFileName}.json`, JSON.stringify(objData));
-      this.resetSomeData();
     },
 
     resetSomeData() {

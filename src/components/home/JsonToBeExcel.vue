@@ -103,7 +103,6 @@ export default {
               const json = fs.readFileSync(`${_that.selectFilePath}/${filename}`, { encoding: 'utf8' });
               const jsonData = JSON.parse(json);
               Object.keys(jsonData).forEach((key, index) => {
-                // this.index = this.index + (index > 0 ? 1 : 0);
                 _that.fillXlsxData({ jsonItem: jsonData[key], index: this.index, fileIndex, key });
               });
             }
@@ -123,7 +122,6 @@ export default {
         const keys = Object.keys(jsonItem);
         keys.forEach((key, idx) => {
           const __key =  `${__oldKay}-${key}`;
-          // this.index = (index + idx) < this.index ? this.index + 1 : index + idx;
           this.index = (index + idx) < this.index ? this.index : index + idx;
           if (idx === keys.length - 1) {
             this.fillXlsxData({
